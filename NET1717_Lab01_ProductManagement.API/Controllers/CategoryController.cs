@@ -6,7 +6,7 @@ using NET1717_Lab01_ProductManagement.Repository.Entities;
 
 namespace NET1717_Lab01_ProductManagement.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/categories")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -23,7 +23,12 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
             var responseCategories = _unitOfWork.CategoryRepository.Get();
             return Ok(responseCategories);
         }
-
+        [HttpGet("{id}")]
+        public IActionResult GetCategoryById(int id)
+        {
+            var responseCategories = _unitOfWork.CategoryRepository.GetByID(id);
+            return Ok(responseCategories);
+        }
         [HttpPost]
         public IActionResult CreateCategory(RequestCategoryModel requestCategoryModel)
         {
@@ -36,7 +41,7 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
             return Ok();
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public IActionResult UpdateCategory(int id, RequestCategoryModel requestCategoryModel)
         {
             var existedCategoryEntity = _unitOfWork.CategoryRepository.GetByID(id);
@@ -49,7 +54,7 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
             return Ok();
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public IActionResult DeleteCategory(int id)
         {
             var existedCategoryEntity = _unitOfWork.CategoryRepository.GetByID(id);
