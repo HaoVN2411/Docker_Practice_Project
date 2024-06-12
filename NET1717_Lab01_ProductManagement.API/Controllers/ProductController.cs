@@ -29,15 +29,15 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpGet]
-        public IActionResult SearchProduct([FromQuery] RequestSearchProductModel requestSearchProductModel)
+        public IActionResult SearchProduct([ModelBinder(BinderType = typeof(KebabCaseQueryModelBinder))] RequestSearchProductModel requestSearchProductModel)
         {
             var sortBy = requestSearchProductModel.sortProductBy != null ? requestSearchProductModel.sortProductBy?.ToString() : null;
             var sortType = requestSearchProductModel.sortProductType != null ? requestSearchProductModel.sortProductType?.ToString() : null;
             Expression<Func<ProductEntity, bool>> filter = x =>
                 (string.IsNullOrEmpty(requestSearchProductModel.ProductName) || x.ProductName.Contains(requestSearchProductModel.ProductName)) &&
-                (x.CategoryId == requestSearchProductModel.CategoryId || requestSearchProductModel.CategoryId == null) && 
-                x.UnitPrice >= requestSearchProductModel.FromUnitPrice && 
-                (x.UnitPrice <= requestSearchProductModel.ToUnitPrice || requestSearchProductModel.ToUnitPrice == null) ;
+                (x.CategoryId == requestSearchProductModel.CategoryId || requestSearchProductModel.CategoryId == null) &&
+                x.UnitPrice >= requestSearchProductModel.FromUnitPrice &&
+                (x.UnitPrice <= requestSearchProductModel.ToUnitPrice || requestSearchProductModel.ToUnitPrice == null);
             Func<IQueryable<ProductEntity>, IOrderedQueryable<ProductEntity>> orderBy = null;
 
             if (!string.IsNullOrEmpty(sortBy))
@@ -65,7 +65,11 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
         public IActionResult GetProductById(int id)
         {
             var responseCategories = _unitOfWork.ProductRepository.GetByID(id);
-            return Ok(responseCategories);
+            if (responseCategories != null)
+            {
+                return Ok(responseCategories);
+            }
+            return NotFound();
         }
         [HttpPost]
         public IActionResult CreateProduct(RequestCreateProductModel requestCreateProductModel)

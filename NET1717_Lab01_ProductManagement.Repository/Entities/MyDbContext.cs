@@ -1,15 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using NET1717_Lab01_ProductManagement.Repository.DBContextConfiguration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace NET1717_Lab01_ProductManagement.Repository.Entities
 {
-    public class MyDbContext : DbContext
+    public class MyDbContext : IdentityDbContext<IdentityUser>
     {
         public MyDbContext()
         {
@@ -31,6 +36,11 @@ namespace NET1717_Lab01_ProductManagement.Repository.Entities
             {
                 Console.WriteLine(ex.ToString());
             }
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.AddInterceptors(new SoftDeleteInterceptor());
         }
 
         public virtual DbSet<CategoryEntity> CategoryEntities { get; set; }
@@ -100,6 +110,7 @@ namespace NET1717_Lab01_ProductManagement.Repository.Entities
                 }
                 );
         }
+
 
     }
 }

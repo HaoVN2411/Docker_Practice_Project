@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace NET1717_Lab01_ProductManagement.Repository
 {
-    public class GenericRepository<TEntity> where TEntity : class
+    public class GenericRepository<TEntity> where TEntity : class, ISoftDelete
     {
         internal MyDbContext context;
         internal DbSet<TEntity> dbSet;
@@ -29,6 +29,12 @@ namespace NET1717_Lab01_ProductManagement.Repository
             int? pageSize = null)  // Optional parameter for pagination (number of records per page)
         {
             IQueryable<TEntity> query = dbSet;
+            // Add a filter for soft delete
+
+
+            // Add a filter for soft delete
+            //query = query.Where(e => !EF.Property<bool>(e, "IsDeleted"));
+            query = query.Where(e => !e.IsDeleted);
 
             if (filter != null)
             {
@@ -61,7 +67,15 @@ namespace NET1717_Lab01_ProductManagement.Repository
 
         public virtual TEntity GetByID(int id)
         {
-            return dbSet.Find(id);
+            // Retrieve the entity by its primary key
+            var entity = dbSet.Find(id);
+
+            // Check if the entity exists and is not soft-deleted
+            if (entity != null && !entity.IsDeleted)
+            {
+                return entity;
+            }
+            return null;
         }
 
         public virtual void Insert(TEntity entity)

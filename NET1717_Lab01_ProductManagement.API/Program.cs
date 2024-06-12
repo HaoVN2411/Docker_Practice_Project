@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -8,17 +9,21 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+//    .AddEntityFrameworkStores<MyDbContext>();
+
 // Add services to the container.
 
-builder.Services.AddControllers(opts =>
+builder.Services.AddControllers(options =>
 {
-    opts.ModelBinderProviders.Insert(0, new KebabCaseQueryModelBinderProvider());
-
+    options.ModelBinderProviders.Insert(0, new KebabCaseQueryModelBinderProvider());
 }).AddJsonOptions(opts =>
 {
     opts.JsonSerializerOptions.PropertyNamingPolicy = new KebabCaseNamingPolicy();
     opts.JsonSerializerOptions.DictionaryKeyPolicy = new KebabCaseNamingPolicy();
 });
+
+builder.Services.AddAuthorization();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

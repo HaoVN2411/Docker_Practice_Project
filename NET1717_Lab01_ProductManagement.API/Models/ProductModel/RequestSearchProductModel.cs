@@ -20,15 +20,15 @@ namespace NET1717_Lab01_ProductManagement.API.Models.ProductModel
 
     public enum SortProductByEnum
     {
-        ProductId,
-        ProductName,
-        CategoryId,
-        UnitsInStock,
-        UnitPrice,
+        ProductId = 1,
+        ProductName = 2,
+        CategoryId = 3,
+        UnitsInStock = 4,
+        UnitPrice = 5,
     }
     public enum SortProductTypeEnum
     {
-        Ascending,
-        Descending,
+        Ascending = 1,
+        Descending = 2,
     }
 }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace NET1717_Lab01_ProductManagement.Repository.Entities
 {
     [Table("Product")]
-    public class ProductEntity
+    public class ProductEntity : ISoftDelete
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProductId { get; set; }
@@ -24,5 +24,7 @@ namespace NET1717_Lab01_ProductManagement.Repository.Entities
 
         [ForeignKey(nameof(CategoryId))]
         public CategoryEntity CategoryEntity { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTimeOffset? DeletedAt { get; set; }
     }
 }
