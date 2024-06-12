@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using NET1717_Lab01_ProductManagement.API.Extentions;
 using NET1717_Lab01_ProductManagement.Repository;
 using NET1717_Lab01_ProductManagement.Repository.Entities;
 using System.Reflection;
@@ -8,10 +10,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(opts =>
+{
+    opts.ModelBinderProviders.Insert(0, new KebabCaseQueryModelBinderProvider());
+
+}).AddJsonOptions(opts =>
+{
+    opts.JsonSerializerOptions.PropertyNamingPolicy = new KebabCaseNamingPolicy();
+    opts.JsonSerializerOptions.DictionaryKeyPolicy = new KebabCaseNamingPolicy();
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options => {
+    options.SchemaFilter<EnumSchemaFilter>();
+});
 
 builder.Services.AddDbContext<MyDbContext>(options =>
 {
@@ -38,6 +51,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();

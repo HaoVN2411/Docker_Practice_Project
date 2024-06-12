@@ -1,6 +1,7 @@
 ﻿using NET1717_Lab01_ProductManagement.Repository.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace NET1717_Lab01_ProductManagement.API.Models.ProductModel
 {

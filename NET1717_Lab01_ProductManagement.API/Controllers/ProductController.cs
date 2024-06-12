@@ -6,6 +6,7 @@ using NET1717_Lab01_ProductManagement.API.Models.CategoryModel;
 using NET1717_Lab01_ProductManagement.API.Models.ProductModel;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using NET1717_Lab01_ProductManagement.API.Extentions;
 
 namespace NET1717_Lab01_ProductManagement.API.Controllers
 {
@@ -25,13 +26,13 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
         /// 
         /// SortType (Ascending = 1,Descending = 2,)        
         /// </summary>
-        /// <param name="requestSearchProductModel"></param>
+        /// <param name="model"></param>
         /// <returns></returns>
         [HttpGet]
         public IActionResult SearchProduct([FromQuery] RequestSearchProductModel requestSearchProductModel)
         {
-            var sortBy = requestSearchProductModel.SortContent != null ? requestSearchProductModel.SortContent?.sortProductBy.ToString() : null;
-            var sortType = requestSearchProductModel.SortContent != null ? requestSearchProductModel.SortContent?.sortProductType.ToString() : null;
+            var sortBy = requestSearchProductModel.sortProductBy != null ? requestSearchProductModel.sortProductBy?.ToString() : null;
+            var sortType = requestSearchProductModel.sortProductType != null ? requestSearchProductModel.sortProductType?.ToString() : null;
             Expression<Func<ProductEntity, bool>> filter = x =>
                 (string.IsNullOrEmpty(requestSearchProductModel.ProductName) || x.ProductName.Contains(requestSearchProductModel.ProductName)) &&
                 (x.CategoryId == requestSearchProductModel.CategoryId || requestSearchProductModel.CategoryId == null) && 
@@ -51,7 +52,7 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
                 }
             }
             var responseCategorie = _unitOfWork.ProductRepository.Get(
-                null,
+                filter,
                 orderBy,
                 includeProperties: "",
                 pageIndex: requestSearchProductModel.pageIndex,

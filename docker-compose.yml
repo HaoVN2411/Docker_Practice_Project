@@ -10,6 +10,7 @@ services:
       context: .
       dockerfile: NET1717_Lab01_ProductManagement.API/Dockerfile
     ports:
+        - 8386:443
         - 8001:80
     depends_on: 
         - lab01db
