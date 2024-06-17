@@ -62,8 +62,8 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
             return Ok(new PagedResponse<IEnumerable<ProductEntity>>
             {
                 Data = responseCategorie.entities,
-                PageIndex = requestSearchProductModel.pageIndex,
-                PageSize = requestSearchProductModel.pageSize,
+                PageIndex = responseCategorie.pageIndex,
+                PageSize = responseCategorie.pageSize,
                 Status = 200,
                 TotalCount = responseCategorie.totalCount,
                 TotalPages = responseCategorie.totalPages,

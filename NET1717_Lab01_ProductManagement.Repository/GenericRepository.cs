@@ -21,7 +21,8 @@ namespace NET1717_Lab01_ProductManagement.Repository
         }
 
         // Updated Get method with pagination
-        public virtual (IEnumerable<TEntity> entities, int totalCount, int totalPages) Get(
+        public virtual (IEnumerable<TEntity> entities, int totalCount, int totalPages
+            , int pageIndex, int pageSize) Get(
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "",
@@ -30,7 +31,7 @@ namespace NET1717_Lab01_ProductManagement.Repository
         {
             IQueryable<TEntity> query = dbSet;
             // Add a filter for soft delete
-            int totalCount = 0, totalPage = 0;
+            int totalCount = 0, totalPage = 0, validPageIndex = 0, validPageSize = 0;
             // Add a filter for soft delete
             //query = query.Where(e => !EF.Property<bool>(e, "IsDeleted"));
             query = query.Where(e => !e.IsDeleted);
@@ -58,13 +59,13 @@ namespace NET1717_Lab01_ProductManagement.Repository
             if (pageIndex.HasValue && pageSize.HasValue)
             {
                 // Ensure the pageIndex and pageSize are valid
-                int validPageIndex = pageIndex.Value > 0 ? pageIndex.Value - 1 : 0;
-                int validPageSize = pageSize.Value > 0 ? pageSize.Value : 10; // Assuming a default pageSize of 10 if an invalid value is passed
+                validPageIndex = pageIndex.Value > 0 ? pageIndex.Value - 1 : 0;
+                validPageSize = pageSize.Value > 0 ? pageSize.Value : 10; // Assuming a default pageSize of 10 if an invalid value is passed
                 totalPage = (int)Math.Ceiling((double) totalCount / (double) validPageSize);
                 query = query.Skip(validPageIndex * validPageSize).Take(validPageSize);
             }
 
-            return (query.ToList(), totalCount, totalPage);
+            return (query.ToList(), totalCount, totalPage, validPageIndex + 1, validPageSize);
         }
 
         public virtual TEntity GetByID(int id)
