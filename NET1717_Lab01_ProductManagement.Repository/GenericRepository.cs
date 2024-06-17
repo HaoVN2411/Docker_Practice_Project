@@ -53,7 +53,6 @@ namespace NET1717_Lab01_ProductManagement.Repository
             }
 
             totalCount = query.Count();
-            totalPage = (int)Math.Ceiling(totalCount / (double) pageSize);
 
             // Implementing pagination
             if (pageIndex.HasValue && pageSize.HasValue)
@@ -61,7 +60,7 @@ namespace NET1717_Lab01_ProductManagement.Repository
                 // Ensure the pageIndex and pageSize are valid
                 int validPageIndex = pageIndex.Value > 0 ? pageIndex.Value - 1 : 0;
                 int validPageSize = pageSize.Value > 0 ? pageSize.Value : 10; // Assuming a default pageSize of 10 if an invalid value is passed
-
+                totalPage = (int)Math.Ceiling((double) totalCount / (double) validPageSize);
                 query = query.Skip(validPageIndex * validPageSize).Take(validPageSize);
             }
 
