@@ -7,6 +7,7 @@ using NET1717_Lab01_ProductManagement.API.Models.ProductModel;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using NET1717_Lab01_ProductManagement.API.Extentions;
+using NET1717_Lab01_ProductManagement.API.Models;
 
 namespace NET1717_Lab01_ProductManagement.API.Controllers
 {
@@ -58,7 +59,17 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
                 pageIndex: requestSearchProductModel.pageIndex,
                 pageSize: requestSearchProductModel.pageSize
             );
-            return Ok(responseCategorie);
+            return Ok(new PagedResponse<IEnumerable<ProductEntity>>
+            {
+                Data = responseCategorie.entities,
+                PageIndex = requestSearchProductModel.pageIndex,
+                PageSize = requestSearchProductModel.pageSize,
+                Status = 200,
+                TotalCount = responseCategorie.totalCount,
+                TotalPages = responseCategorie.totalPages,
+                Message = "Successfully"
+            });
+            
         }
 
         [HttpGet("{id}")]

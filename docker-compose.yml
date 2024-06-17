@@ -10,8 +10,8 @@ services:
       context: .
       dockerfile: NET1717_Lab01_ProductManagement.API/Dockerfile
     ports:
-        - 8386:443
-        - 8001:80
+        - 9876:443
+        - 7689:80
     depends_on: 
         - lab01db
     networks:
@@ -21,7 +21,7 @@ services:
     container_name: lab01-db
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
-        - 8002:1433
+        - 7895:1433
     environment:
         - ACCEPT_EULA=Y
         - MSSQL_SA_PASSWORD=Hao123456@

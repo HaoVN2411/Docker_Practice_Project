@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using NET1717_Lab01_ProductManagement.API.Extentions;
+using NET1717_Lab01_ProductManagement.API.Middleware;
 using NET1717_Lab01_ProductManagement.Repository;
 using NET1717_Lab01_ProductManagement.Repository.Entities;
 using System.Reflection;
@@ -27,9 +28,9 @@ builder.Services.AddAuthorization();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => {
-    options.SchemaFilter<EnumSchemaFilter>();
-});
+//builder.Services.AddSwaggerGen(options => {
+//    options.SchemaFilter<EnumSchemaFilter>();
+//});
 
 builder.Services.AddDbContext<MyDbContext>(options =>
 {
@@ -37,6 +38,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 });
 
 builder.Services.AddTransient<UnitOfWork>();
+builder.Services.AddSingleton<ResponseModelMiddleware>();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -62,6 +64,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
+app.UseMiddleware<ResponseModelMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

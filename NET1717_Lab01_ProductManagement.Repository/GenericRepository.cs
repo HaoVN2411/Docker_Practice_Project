@@ -21,7 +21,7 @@ namespace NET1717_Lab01_ProductManagement.Repository
         }
 
         // Updated Get method with pagination
-        public virtual IEnumerable<TEntity> Get(
+        public virtual (IEnumerable<TEntity> entities, int totalCount, int totalPages) Get(
             Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "",
@@ -30,11 +30,11 @@ namespace NET1717_Lab01_ProductManagement.Repository
         {
             IQueryable<TEntity> query = dbSet;
             // Add a filter for soft delete
-
-
+            int totalCount = 0, totalPage = 0;
             // Add a filter for soft delete
             //query = query.Where(e => !EF.Property<bool>(e, "IsDeleted"));
             query = query.Where(e => !e.IsDeleted);
+
 
             if (filter != null)
             {
@@ -52,6 +52,9 @@ namespace NET1717_Lab01_ProductManagement.Repository
                 query = orderBy(query);
             }
 
+            totalCount = query.Count();
+            totalPage = (int)Math.Ceiling(totalCount / (double) pageSize);
+
             // Implementing pagination
             if (pageIndex.HasValue && pageSize.HasValue)
             {
@@ -62,7 +65,7 @@ namespace NET1717_Lab01_ProductManagement.Repository
                 query = query.Skip(validPageIndex * validPageSize).Take(validPageSize);
             }
 
-            return query.ToList();
+            return (query.ToList(), totalCount, totalPage);
         }
 
         public virtual TEntity GetByID(int id)
