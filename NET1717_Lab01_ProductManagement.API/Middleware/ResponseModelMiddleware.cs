@@ -1,7 +1,7 @@
-﻿
-using NET1717_Lab01_ProductManagement.API.Models;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using System.Text.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace NET1717_Lab01_ProductManagement.API.Middleware
 {
@@ -21,35 +21,22 @@ namespace NET1717_Lab01_ProductManagement.API.Middleware
                 {
                     responseBody.Seek(0, SeekOrigin.Begin);
                     var responseBodyText = await new StreamReader(responseBody).ReadToEndAsync();
+                    object data = null;
 
-                    object data = JsonSerializer.Deserialize<object>(responseBodyText);
-                    BaseResponse<object> baseResponse;
-
-                    if (data is PagedResponse<object> pagedData)
+                    if (IsValidJson(responseBodyText)) 
                     {
-                        baseResponse = new PagedResponse<object>(
-                            pagedData.Status,
-                            pagedData.Message,
-                            pagedData.Data,
-                            pagedData.PageIndex,
-                            pagedData.PageSize,
-                            pagedData.TotalPages,
-                            pagedData.TotalCount
-                        );
+                        data = System.Text.Json.JsonSerializer.Deserialize<object>(responseBodyText);
                     }
-                    else
+                    BaseResponseMiddleware<object> baseResponse;
+                    baseResponse = new BaseResponseMiddleware<object>(
+                        context.Response.StatusCode,
+                        "Successfully",
+                        data: data
+                    );
+                    var json = System.Text.Json.JsonSerializer.Serialize(baseResponse, new JsonSerializerOptions
                     {
-                        baseResponse = new BaseResponse<object>(
-                            context.Response.StatusCode,
-                            "Success",
-                            data
-                        );
-                    }
-
-                    var json = JsonSerializer.Serialize(baseResponse, new JsonSerializerOptions
-                    {
-                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                        //DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     });
 
                     await context.Response.WriteAsync(json);
@@ -60,6 +47,34 @@ namespace NET1717_Lab01_ProductManagement.API.Middleware
                     await responseBody.CopyToAsync(originalBodyStream);
                 }
             }
+
+
         }
+        private bool IsValidJson(string strInput)
+        {
+            if (string.IsNullOrWhiteSpace(strInput)) return false;
+
+            strInput = strInput.Trim();
+            if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || // For object
+                (strInput.StartsWith("[") && strInput.EndsWith("]"))) // For array
+            {
+                try
+                {
+                    JToken.Parse(strInput);
+                    return true;
+                }
+                catch (JsonReaderException)
+                {
+                    return false;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
     }
 }

@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using NET1717_Lab01_ProductManagement.API.Extentions;
 using NET1717_Lab01_ProductManagement.API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NET1717_Lab01_ProductManagement.API.Controllers
 {
@@ -29,7 +30,8 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpGet]
+        [Authorize]
+        [HttpGet("search-product")]
         public IActionResult SearchProduct([ModelBinder(BinderType = typeof(KebabCaseQueryModelBinder))] RequestSearchProductModel requestSearchProductModel)
         {
             var sortBy = requestSearchProductModel.sortProductBy != null ? requestSearchProductModel.sortProductBy?.ToString() : null;
@@ -64,15 +66,13 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
                 Data = responseCategorie.entities,
                 PageIndex = responseCategorie.pageIndex,
                 PageSize = responseCategorie.pageSize,
-                Status = 200,
                 TotalCount = responseCategorie.totalCount,
                 TotalPages = responseCategorie.totalPages,
-                Message = "Successfully"
             });
-            
+
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("get-product-by-id/{id}")]
         public IActionResult GetProductById(int id)
         {
             var responseCategories = _unitOfWork.ProductRepository.GetByID(id);
@@ -82,7 +82,7 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
             }
             return NotFound();
         }
-        [HttpPost]
+        [HttpPost("create-product")]
         public IActionResult CreateProduct(RequestCreateProductModel requestCreateProductModel)
         {
             var productEntity = new ProductEntity
@@ -94,29 +94,31 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
             };
             _unitOfWork.ProductRepository.Insert(productEntity);
             _unitOfWork.Save();
-            return Ok();
+            return Ok(productEntity);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("update-product-by-id/{id}")]
         public IActionResult UpdateProduct(int id, RequestCreateProductModel requestCreateProductModel)
         {
             var existedProductEntity = _unitOfWork.ProductRepository.GetByID(id);
-            if (existedProductEntity != null)
-            {
-                existedProductEntity.CategoryId = requestCreateProductModel.CategoryId;
-                existedProductEntity.ProductName = requestCreateProductModel.ProductName;
-                existedProductEntity.UnitPrice = requestCreateProductModel.UnitPrice;
-                existedProductEntity.UnitsInStock = requestCreateProductModel.UnitsInStock;
-            }
+            if (existedProductEntity == null) return NotFound();
+
+            existedProductEntity.CategoryId = requestCreateProductModel.CategoryId;
+            existedProductEntity.ProductName = requestCreateProductModel.ProductName;
+            existedProductEntity.UnitPrice = requestCreateProductModel.UnitPrice;
+            existedProductEntity.UnitsInStock = requestCreateProductModel.UnitsInStock;
+
             _unitOfWork.ProductRepository.Update(existedProductEntity);
             _unitOfWork.Save();
-            return Ok();
+            return Ok(existedProductEntity);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("delete-product-by-id/{id}")]
         public IActionResult DeleteProduct(int id)
         {
+            if (id < 0) return BadRequest("Id must be a positive value.");
             var existedCategoryEntity = _unitOfWork.ProductRepository.GetByID(id);
+            if (existedCategoryEntity == null) return NotFound();
             _unitOfWork.ProductRepository.Delete(existedCategoryEntity);
             _unitOfWork.Save();
             return Ok();

@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NET1717_Lab01_ProductManagement.API.Models;
 using NET1717_Lab01_ProductManagement.API.Models.CategoryModel;
 using NET1717_Lab01_ProductManagement.Repository;
 using NET1717_Lab01_ProductManagement.Repository.Entities;
@@ -17,19 +19,31 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet]
+        [Authorize(Roles = "admin")]
+        [HttpGet("search-categories")]
         public IActionResult GetAll()
         {
             var responseCategories = _unitOfWork.CategoryRepository.Get();
-            return Ok(responseCategories);
+            return Ok(new PagedResponse<List<CategoryEntity>>
+            {
+                Data = responseCategories.entities.ToList(),
+                PageIndex = responseCategories.pageIndex,
+                PageSize = responseCategories.pageSize,
+                TotalCount = responseCategories.totalCount,
+                TotalPages = responseCategories.totalPages
+            });
         }
-        [HttpGet("{id}")]
+        [HttpGet("get-category-by-id/{id}")]
         public IActionResult GetCategoryById(int id)
         {
             var responseCategories = _unitOfWork.CategoryRepository.GetByID(id);
+            if (responseCategories == null)
+            {
+                return NotFound();
+            }
             return Ok(responseCategories);
         }
-        [HttpPost]
+        [HttpPost("create-category")]
         public IActionResult CreateCategory(RequestCategoryModel requestCategoryModel)
         {
             var categoryEntity = new CategoryEntity
@@ -41,7 +55,7 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
             return Ok();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("update-category-by-id/{id}")]
         public IActionResult UpdateCategory(int id, RequestCategoryModel requestCategoryModel)
         {
             var existedCategoryEntity = _unitOfWork.CategoryRepository.GetByID(id);
@@ -54,7 +68,7 @@ namespace NET1717_Lab01_ProductManagement.API.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("delete-category-by-id/{id}")]
         public IActionResult DeleteCategory(int id)
         {
             var existedCategoryEntity = _unitOfWork.CategoryRepository.GetByID(id);

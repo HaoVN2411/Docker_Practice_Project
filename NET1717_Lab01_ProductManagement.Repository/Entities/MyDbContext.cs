@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using NET1717_Lab01_ProductManagement.Repository.DBContextConfiguration;
@@ -14,8 +12,10 @@ using System.Threading.Tasks;
 
 namespace NET1717_Lab01_ProductManagement.Repository.Entities
 {
-    public class MyDbContext : IdentityDbContext<IdentityUser>
+    public class MyDbContext : DbContext
     {
+        private static bool _databaseInitialized = false;
+        private static readonly object _lock = new object();
         public MyDbContext()
         {
 
@@ -36,8 +36,39 @@ namespace NET1717_Lab01_ProductManagement.Repository.Entities
             {
                 Console.WriteLine(ex.ToString());
             }
+            //InitializeDatabase();
         }
-
+        private void InitializeDatabase()
+        {
+            // Ensure that the database initialization runs only once
+            if (!_databaseInitialized)
+            {
+                lock (_lock)
+                {
+                    if (!_databaseInitialized)
+                    {
+                        try
+                        {
+                            var databaseCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
+                            if (databaseCreator != null)
+                            {
+                                if (databaseCreator.CanConnect())
+                                {
+                                    databaseCreator.Delete();
+                                }
+                                databaseCreator.Create();
+                                databaseCreator.CreateTables();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
+                        _databaseInitialized = true;
+                    }
+                }
+            }
+        }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.AddInterceptors(new SoftDeleteInterceptor());
@@ -45,10 +76,29 @@ namespace NET1717_Lab01_ProductManagement.Repository.Entities
 
         public virtual DbSet<CategoryEntity> CategoryEntities { get; set; }
         public virtual DbSet<ProductEntity> ProductEntities { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = 1,
+                    Name = "Hao",
+                    userName = "kakaka",
+                    userPassword = "123",
+                    role = "admin"
+                },
+                new User
+                {
+                    Id = 2,
+                    Name = "string",
+                    userName = "string",
+                    userPassword = "string",
+                    role = "user"
+                }
+                );
             modelBuilder.Entity<CategoryEntity>().HasData(
                 new CategoryEntity { CategoryId = 1, CategoryName = "Beverages" },
                 new CategoryEntity { CategoryId = 2, CategoryName = "Condiments" },

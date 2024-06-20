@@ -13,6 +13,8 @@ namespace NET1717_Lab01_ProductManagement.Repository
         private MyDbContext _context;
         private GenericRepository<CategoryEntity> _category;
         private GenericRepository<ProductEntity> _product;
+        private GenericRepository<User> _user;
+
 
 
         public UnitOfWork(MyDbContext context)
@@ -41,6 +43,18 @@ namespace NET1717_Lab01_ProductManagement.Repository
                     this._product = new GenericRepository<ProductEntity>(_context);
                 }
                 return _product;
+            }
+
+        }
+        public GenericRepository<User> UserRepository
+        {
+            get
+            {
+                if (_user == null)
+                {
+                    this._user = new GenericRepository<User>(_context);
+                }
+                return _user;
             }
 
         }
